@@ -1,3 +1,112 @@
-<button id="check">Check Info</button>
-<p id="result"></p>
-<script src="popup.js"></script>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+ <style>
+    body {
+      width: 300px;
+      min-height: 200px;
+      padding: 15px;
+      font-family: Arial, sans-serif;
+      margin: 0;
+    }
+    
+    h3 {
+      margin: 0 0 10px 0;
+      color: #007bff;
+    }
+    
+    .selected-text-container {
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      border-left: 3px solid #007bff;
+    }
+    
+    .label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    #selectedText {
+      font-size: 13px;
+      color: #333;
+      word-wrap: break-word;
+      line-height: 1.4;
+    }
+    
+    #result {
+      margin-top: 10px;
+      padding: 15px;
+      border-radius: 5px;
+      background: #f9f9f9;
+      min-height: 150px;
+      font-size: 14px;
+      line-height: 1.5;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .loading {
+      color: #666;
+      font-style: italic;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .result-verdict {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      padding: 8px;
+      border-radius: 5px;
+      text-align: center;
+    }
+    
+    .result-confidence {
+      margin: 10px 0;
+      padding: 8px;
+      background: #e3f2fd;
+      border-radius: 5px;
+    }
+    
+    .result-details {
+      margin-top: 10px;
+      padding: 8px;
+      color: #555;
+      font-size: 13px;
+    }
+    
+    .verdict-fake {
+      background: #ffcdd2;
+      color: #c62828;
+    }
+    
+    .verdict-real {
+      background: #c8e6c9;
+      color: #2e7d32;
+    }
+    
+    .verdict-uncertain {
+      background: #fff9c4;
+      color: #f57f17;
+    }
+    
+    hr {
+      margin: 10px 0;
+      border: none;
+      border-top: 1px solid #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <h3>Fake News Detector</h3>
+  <div id="selectedText">No text selected</div>
+  
+  <div id="result">Result will appear here</div>
+  <script src="popup.js"></script>
+</body>
+</html>
+
