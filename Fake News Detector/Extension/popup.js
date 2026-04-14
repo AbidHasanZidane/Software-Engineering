@@ -1,35 +1,49 @@
-
-document.getElementById("check").onclick = async () => {
-    let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-    chrome.tabs.sendMessage(tab.id, { action: "getText" }, async (response) => {
-        let text = response.text;
-
-        if (!text) {
-            alert("Please select some text first.");
-            return;
-        }
-
-        try {
-            console.log("Sending request...");
-
-            let response = await fetch("http://127.0.0.1:5000/predict", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ text })
-            });
-
-            console.log("Response received:", response);
-
-            let data = await response.json();
-            console.log("Data:", data);
-
-            alert(`Result: ${data.label} (${data.confidence})\n${data.explanation}`);
-        } catch (err) {
-            console.error("Fetch error:", err);
-            alert("Error connecting to API");
-        }
-    });
-};
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 300px;
+      padding: 10px;
+      font-family: Arial, sans-serif;
+    }
+    #result {
+      margin-top: 10px;
+      padding: 8px;
+      border-radius: 4px;
+      background: #f5f5f5;
+      min-height: 60px;
+    }
+    .loading {
+      color: #666;
+      font-style: italic;
+    }
+    .error {
+      color: red;
+    }
+    .success {
+      color: green;
+    }
+    button {
+      width: 100%;
+      padding: 8px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h3>Fake News Detector</h3>
+  <div id="selectedText">No text selected</div>
+  <button id="checkBtn">Check Selected Text</button>
+  <div id="result">Result will appear here</div>
+  <script src="popup.js"></script>
+</body>
+</html>
