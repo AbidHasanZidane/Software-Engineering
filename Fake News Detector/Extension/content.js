@@ -1,9 +1,12 @@
-function getSelectedText() {
-    return window.getSelection().toString().trim();
-}
+// content.js - Injects a floating button when text is selected
+let floatingButton = null;
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "getText") {
-        sendResponse({ text: getSelectedText() });
+document.addEventListener('mouseup', (e) => {
+    const selectedText = window.getSelection().toString().trim();
+
+    if (selectedText.length > 0) {
+        showFloatingButton(e.clientX, e.clientY, selectedText);
+    } else {
+        removeFloatingButton();
     }
 });
