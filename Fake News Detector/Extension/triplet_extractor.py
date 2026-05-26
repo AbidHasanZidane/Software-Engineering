@@ -7,9 +7,8 @@ nlp = spacy.load("en_core_web_sm")
 
 KB_FILE = "general_knowledge_base.json"
 
-# ---------------------------------------------------
 # BAD WORD FILTERS
-# ---------------------------------------------------
+
 BAD_SUBJECTS = {
     "he", "she", "it", "they",
     "his", "her", "their",
@@ -31,9 +30,8 @@ BAD_PATTERNS = {
 }
 
 
-# ---------------------------------------------------
 # LOAD / SAVE KB
-# ---------------------------------------------------
+
 def load_kb():
 
     if os.path.exists(KB_FILE):
@@ -52,10 +50,8 @@ def save_kb(kb):
 
 kb = load_kb()
 
-
-# ---------------------------------------------------
 # CLEANING HELPERS
-# ---------------------------------------------------
+
 def normalize_text(text):
 
     text = re.sub(r"\s+", " ", text)
@@ -180,21 +176,19 @@ def clean_triplet(triplet):
     }
 
 
-# ---------------------------------------------------
 # MAIN EXTRACTION
-# ---------------------------------------------------
+
 def extract_triplets_general(text):
 
     doc = nlp(text)
 
     triplets = []
     negated_triplets = []
-
-    # ---------------------------------------------------
     # VERB RELATIONS
-    # ---------------------------------------------------
+
     for token in doc:
 
+        # only process verbs or auxiliary roots
         if token.pos_ != "VERB" and not (
             token.pos_ == "AUX" and token.dep_ == "ROOT"
         ):
@@ -203,9 +197,11 @@ def extract_triplets_general(text):
         subj = None
         obj = None
 
-        # -----------------------------
+        # default predicate
+        predicate = token.lemma_
+
         # SUBJECT
-        # -----------------------------
+   
         for child in token.children:
 
             if child.dep_ in ["nsubj", "nsubjpass"]:
@@ -215,11 +211,12 @@ def extract_triplets_general(text):
                 if subj:
                     break
 
-        # -----------------------------
-        # OBJECT
-        # -----------------------------
+        
+        # OBJECT + PHRASAL VERBS
+        
         for child in token.children:
 
+            # direct object
             if child.dep_ in ["dobj", "attr"]:
 
                 obj = get_full_span(child)
@@ -227,7 +224,7 @@ def extract_triplets_general(text):
                 if obj:
                     break
 
-            # prepositional objects
+            # prepositional phrases
             if child.dep_ == "prep":
 
                 prep = child.lemma_
@@ -240,21 +237,30 @@ def extract_triplets_general(text):
 
                         if pobj:
 
-                            obj = f"{prep} {pobj}"
+                            # attach prep to predicate
+                            predicate = f"{token.lemma_} {prep}"
+
+                            # clean object
+                            obj = pobj
 
                             break
 
                 if obj:
                     break
 
-        # -----------------------------
+            # phrasal verb particles
+            if child.dep_ == "prt":
+
+                predicate = f"{token.lemma_} {child.lemma_}"
+
+        
         # BUILD TRIPLET
-        # -----------------------------
+     
         if subj and obj:
 
             triplet = {
                 "subject": subj,
-                "predicate": token.lemma_,
+                "predicate": predicate,
                 "object": obj
             }
 
@@ -267,9 +273,8 @@ def extract_triplets_general(text):
                 else:
                     triplets.append(cleaned)
 
-    # ---------------------------------------------------
     # COPULA RELATIONS
-    # ---------------------------------------------------
+   
     for token in doc:
 
         if token.lemma_ not in [
@@ -308,7 +313,8 @@ def extract_triplets_general(text):
                 else:
                     triplets.append(cleaned)
 
-
+    # POSSESSIVE RELATIONS
+   
     for token in doc:
 
         if token.dep_ != "poss":
@@ -341,6 +347,9 @@ def extract_triplets_general(text):
         if cleaned:
             triplets.append(cleaned)
 
+    
+    # REMOVE DUPLICATES
+    
     unique = []
     seen = set()
 
@@ -359,12 +368,12 @@ def extract_triplets_general(text):
     triplets = unique
 
 
+    # FALLBACK PATTERN EXTRACTION
+
     if not triplets and not negated_triplets:
         triplets = extract_with_patterns(text)
 
     return triplets, negated_triplets
-
-
 
 def extract_with_patterns(text):
 
@@ -392,7 +401,6 @@ def extract_with_patterns(text):
             triplets.append(cleaned)
 
     return triplets
-
 
 
 def compare_with_kb(triplets, negated_triplets):
