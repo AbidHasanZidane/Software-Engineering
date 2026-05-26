@@ -1,49 +1,49 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    body {
-      width: 300px;
-      padding: 10px;
-      font-family: Arial, sans-serif;
+// popup.js - Automatically checks text when popup opens
+document.addEventListener('DOMContentLoaded', async () => {
+    const selectedTextDiv = document.getElementById('selectedText');
+    const resultDiv = document.getElementById('result');
+
+    // Get the currently selected text from the active tab (not from storage)
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    const results = await chrome.scripting.executeScript({
+        target: { tabId: tabs[0].id },
+        func: () => window.getSelection().toString().trim()
+    });
+
+    const currentSelectedText = results[0]?.result || '';
+
+    if (currentSelectedText) {
+        // Display the currently selected text
+        selectedTextDiv.textContent = `"${currentSelectedText.substring(0, 100)}${currentSelectedText.length > 100 ? '...' : ''}"`;
+
+        // Store it for the API call
+        await chrome.storage.local.set({ selectedText: currentSelectedText });
+
+        // Auto-check when popup opens
+        resultDiv.innerHTML = '<span class="loading">Checking with AI...</span>';
+
+        chrome.runtime.sendMessage(
+            { action: 'checkText', text: currentSelectedText },
+            (response) => {
+                if (response.error) {
+                    resultDiv.innerHTML = `<span class="error">Error: ${response.error}</span>`;
+                } else {
+                    resultDiv.innerHTML = `
+                        <strong>Result:</strong><br>
+                        Verdict: ${response.verdict}<br>
+                        Confidence: ${response.confidence}%<br>
+                        <small>${response.details}</small>
+                    `;
+                }
+            }
+        );
+    } else {
+        // No text selected - clear everything
+        selectedTextDiv.textContent = 'Please select some text.';
+        resultDiv.innerHTML = '<span class="error"></span>';
+
+        // Clear the stored text to prevent old results
+        await chrome.storage.local.remove('selectedText');
     }
-    #result {
-      margin-top: 10px;
-      padding: 8px;
-      border-radius: 4px;
-      background: #f5f5f5;
-      min-height: 60px;
-    }
-    .loading {
-      color: #666;
-      font-style: italic;
-    }
-    .error {
-      color: red;
-    }
-    .success {
-      color: green;
-    }
-    button {
-      width: 100%;
-      padding: 8px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-  </style>
-</head>
-<body>
-  <h3>Fake News Detector</h3>
-  <div id="selectedText">No text selected</div>
-  <button id="checkBtn">Check Selected Text</button>
-  <div id="result">Result will appear here</div>
-  <script src="popup.js"></script>
-</body>
-</html>
+    
+});
