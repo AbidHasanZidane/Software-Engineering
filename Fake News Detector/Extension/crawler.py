@@ -8,18 +8,17 @@ from urllib.parse import urljoin
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------
+
 # SOURCES
-# ---------------------------------------------------
+
 SOURCES = {
     "Xinhua": "https://english.news.cn/world/index.htm",
     "Global Times": "https://www.globaltimes.cn/world/",
     "CGTN": "https://news.cgtn.com/news/world/index.html"
 }
 
-# ---------------------------------------------------
 # KEYWORDS
-# ---------------------------------------------------
+
 WAR_KEYWORDS = {
     "war", "strike", "attack", "missile", "drone",
     "bomb", "retaliation", "military", "airstrike",
@@ -52,9 +51,8 @@ HEADERS = {
     )
 }
 
-# ---------------------------------------------------
 # TEXT UTILITIES
-# ---------------------------------------------------
+
 def normalize_text(text):
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
@@ -104,9 +102,8 @@ def is_relevant(text):
     return relevance_score(text) >= 8
 
 
-# ---------------------------------------------------
 # SENTENCE FILTERING
-# ---------------------------------------------------
+
 def extract_relevant_sentences(text):
 
     sentences = re.split(r'(?<=[.!?])\s+', text)
@@ -131,10 +128,8 @@ def extract_relevant_sentences(text):
 
     return " ".join(filtered)
 
-
-# ---------------------------------------------------
 # FETCH ARTICLE
-# ---------------------------------------------------
+
 def fetch_full_article(url):
 
     try:
@@ -206,10 +201,8 @@ def fetch_full_article(url):
         logger.error(f"Article fetch error {url}: {e}")
         return ""
 
-
-# ---------------------------------------------------
 # LINK EXTRACTION
-# ---------------------------------------------------
+
 def extract_links(base_url):
 
     try:
@@ -258,9 +251,8 @@ def extract_links(base_url):
         return []
 
 
-# ---------------------------------------------------
 # CRAWLER
-# ---------------------------------------------------
+
 def crawl_and_feed():
 
     for source_name, source_url in SOURCES.items():
@@ -303,9 +295,7 @@ def crawl_and_feed():
                 logger.error(f"Crawl error: {e}")
 
 
-# ---------------------------------------------------
 # SEND TO FLASK KB
-# ---------------------------------------------------
 def update_knowledge_base():
 
     logger.info("Starting KB update cycle...")
