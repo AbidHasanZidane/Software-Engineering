@@ -1,4 +1,4 @@
-// background.js - Handles API calls and popup opening
+// background.js - Handles API calls
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'checkText') {
         // Call the Flask API
@@ -19,8 +19,4 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true; // Keep message channel open for async response
     }
 
-    if (request.action === 'openPopup') {
-        // Open the popup programmatically (optional, user can also click extension icon)
-        chrome.action.openPopup();
-    }
 });
