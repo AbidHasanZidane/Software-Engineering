@@ -14,9 +14,8 @@ atexit.register(lambda: scheduler.shutdown())
 app = Flask(__name__)
 CORS(app)
 
-# ------------------------------------------------------------
 # Route 1: Add a text to the knowledge base (extract & store)
-# ------------------------------------------------------------
+
 @app.route('/add_text', methods=['POST'])
 def add_text():
     data = request.get_json()
@@ -34,9 +33,9 @@ def add_text():
         "total_kb_size": len(get_kb()["triplets"])
     })
 
-# ------------------------------------------------------------
+
 # Route 2: Check a claim against the KB (no storage)
-# ------------------------------------------------------------
+
 @app.route('/check', methods=['POST'])
 def check_text():
     data = request.get_json()
@@ -52,13 +51,13 @@ def check_text():
         confidence = min(95, 60 + len(comparison["contradictions"]) * 10)
         details = f"Found {len(comparison['contradictions'])} contradiction(s) with existing facts."
     elif comparison["matches"]:
-        verdict = "Supported by Knowledge Base"
-        confidence = min(95, 65 + len(comparison["matches"]) * 8)
+        verdict = "Likely True"
+        confidence = min(95, 60 + len(comparison["matches"]) * 8)
         details = f"Matches {len(comparison['matches'])} known fact(s)."
     else:
         verdict = "No Information"
         confidence = 30
-        details = "No matching or contradicting facts found. Add more texts to KB."
+        details = "No matching or contradicting facts found."
 
     return jsonify({
         "verdict": verdict,
